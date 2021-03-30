@@ -10,14 +10,16 @@
 </head>
 <body>
 
-  <form action="">
+  <form action="registration" method="POST">
+    {% csrf_token %}
     <table>
       {{ register_form.as_table }}
     </table>
     <input type="submit" value="Register">
   </form>
   
-  <form action="">
+  <form action="login" method="POST">
+    {% csrf_token %}
     <table>
       {{ login_form.as_table }}
     </table>
