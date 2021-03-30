@@ -2,6 +2,7 @@ from django import forms
 from .models import User
 import re
 import bcrypt
+from datetime import date
 
 class RegisterForm(forms.ModelForm):
 
@@ -27,8 +28,12 @@ class RegisterForm(forms.ModelForm):
         fields = [
             'first_name',
             'last_name',
+            'birthday',
             'email',
         ]
+        widgets = {
+            'birthday' : forms.DateInput(attrs={'type': 'date'})
+        }
         labels = {
             'email': 'Your email',
         }
@@ -54,6 +59,14 @@ class RegisterForm(forms.ModelForm):
             raise forms.ValidationError("Email is used by another user")
         return email
 
+    def clean_birthday(self):
+        birthday = self.cleaned_data.get("birthday")
+        if birthday > date.today():
+            raise forms.ValidationError("Date must be past")
+        if get_age(birthday) < 13:
+            raise forms.ValidationError("You must be over 13 years old")
+        return birthday
+
 
 class LoginForm(forms.ModelForm):
 
@@ -74,6 +87,7 @@ class LoginForm(forms.ModelForm):
         cleaned_data = super(LoginForm, self).clean()
         password = cleaned_data.get("password")
         email = cleaned_data.get("email")
+        print(email, password)
 
         if not is_valid_email(email):
             raise forms.ValidationError("Not valid email")
@@ -83,11 +97,18 @@ class LoginForm(forms.ModelForm):
             raise forms.ValidationError("There is no user with this email")
 
         logged_user = user[0]
-        if not bcrypt.checkpw(password.encode(),
-                          logged_user.password_hash.encode()):
+        if not bcrypt.checkpw(password.encode(), logged_user.password_hash.encode()):
             raise forms.ValidationError("Wrong password")
 
         return cleaned_data
+
+
+def get_age(birthDate):
+    today = date.today()
+    date_is_before_birthday = (today.month, today.day) \
+                               < (birthDate.month, birthDate.day)
+    age = today.year - birthDate.year - date_is_before_birthday
+    return age
 
 
 def contains_digit(string):

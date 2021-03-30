@@ -13,9 +13,11 @@
 
 <body>
 
-  <a href="{% url 'logout' %}">Logout</a>
-  <h1>Success! Welcome, {{ user.first_name }}!</h1>
-  <p>Successfully {{ status }}.</p>
+  <main class="container my-3">
+    <a href="{% url 'logout' %}">Logout</a>
+    <h1>Success! Welcome, {{ user.first_name }}!</h1>
+    <p>Successfully {{ status }}.</p>
+  </main>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js" integrity="sha384-SR1sx49pcuLnqZUnnPwx6FCym0wLsk5JZuNx2bPPENzswTNFaQU1RDvt3wT4gWFG" crossorigin="anonymous"></script>
