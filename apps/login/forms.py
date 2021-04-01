@@ -10,6 +10,7 @@ class RegisterForm(forms.ModelForm):
             attrs={
                 "placeholder": "Write at least 8 characters",
                 "type": "password",
+                "id": "id_password_registration",
             }
         )
     )
@@ -31,7 +32,8 @@ class RegisterForm(forms.ModelForm):
             'email',
         ]
         widgets = {
-            'birthday' : forms.DateInput(attrs={'type': 'date'})
+            'birthday' : forms.DateInput(attrs={'type': 'date'}),
+            'email': forms.EmailInput(attrs={'id': 'id_email_registration'})
         }
         labels = {
             'email': 'Your email',
@@ -43,19 +45,17 @@ class RegisterForm(forms.ModelForm):
         confirm_password = cleaned_data.get("confirm_password")
 
         if password != confirm_password:
-            raise forms.ValidationError("Passwords don't match")
+            raise forms.ValidationError({"confirm_password": "Passwords don't match"})
         errors = password_errors(password)
         if errors:
-            raise forms.ValidationError(errors)
+            raise forms.ValidationError({"password": errors})
         return cleaned_data
 
     def clean_email(self):
         email = self.cleaned_data.get("email")
-        if not is_valid_email(email):
-            raise forms.ValidationError("Not valid email")
-        user_with_email = User.objects.filter(email=email)
-        if user_with_email:
-            raise forms.ValidationError("Email is used by another user")
+        errors = validate_email(email)
+        if errors:
+            raise forms.ValidationError(errors)
         return email
 
     def clean_birthday(self):
@@ -77,6 +77,16 @@ class RegisterForm(forms.ModelForm):
         if len(last_name) < 2:
             raise forms.ValidationError("Last name needs 2 characters or more")
         return last_name
+
+
+def validate_email(email):
+    errors = []
+    if not is_valid_email(email):
+        errors.append("Not valid email")
+    user_with_email = User.objects.filter(email=email)
+    if user_with_email:
+        errors.append("Email is used by another user")
+    return errors
 
 
 class LoginForm(forms.ModelForm):

@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from .models import User
 from .forms import LoginForm, RegisterForm
 import bcrypt
+from .forms import validate_email
+from django.http import JsonResponse
 
 
 def login_and_registration_forms(request):
@@ -80,3 +82,10 @@ def success(request):
 def logout(request):
     del request.session["user_id"]
     return redirect('/')
+
+
+def validate_email_now(request):
+    print("validate email!!!!!!!!!!!")
+    errors = validate_email(request.POST["email"])
+    return JsonResponse({"errors": errors})
+
