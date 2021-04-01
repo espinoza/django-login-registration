@@ -113,12 +113,12 @@ class LoginForm(forms.ModelForm):
             raise forms.ValidationError("Not valid email")
 
         user = User.objects.filter(email=email)
-        if not user:
+        if user:
+            logged_user = user[0]
+            if not bcrypt.checkpw(password.encode(), logged_user.password_hash.encode()):
+                raise forms.ValidationError("Wrong password")
+        else:
             raise forms.ValidationError("There is no user with this email")
-
-        logged_user = user[0]
-        if not bcrypt.checkpw(password.encode(), logged_user.password_hash.encode()):
-            raise forms.ValidationError("Wrong password")
 
         return cleaned_data
 
